@@ -2,7 +2,9 @@ package com.krakedev.inventarios.servicios;
 
 import java.util.ArrayList;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -14,7 +16,7 @@ import com.krakedev.inventarios.entidades.Proveedor;
 import com.krakedev.inventarios.entidades.tipoDocumento;
 import com.krakedev.inventarios.excepciones.KrakeDevException;
 
-@Path("tiposdocumento")
+@Path("proveedores")
 public class ServiciosProveedores {
 	
 	@Path("buscar/{subcadena}")
@@ -46,4 +48,19 @@ public class ServiciosProveedores {
 			return Response.serverError().build();
 		}
 	}
+	
+	@Path("crear")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response crearProveedor(Proveedor proveedor) {
+		ProveedoresBDD provBDD = new ProveedoresBDD();
+		try {
+			provBDD.insertar(proveedor);
+			return Response.ok().build();
+		} catch (KrakeDevException e) {
+			e.printStackTrace();
+			return Response.serverError().build();
+		}
+	}
+	
 }

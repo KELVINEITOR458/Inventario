@@ -2,7 +2,7 @@ package com.krakedev.inventarios.entidades;
 
 public class Proveedor {
 	private String identificador;
-	private String tipoDocumento;
+	private tipoDocumento tipoDocumento;
 	private String nombre;
 	private String telefono;
 	private String correo;
@@ -11,9 +11,8 @@ public class Proveedor {
 		
 	}
 	
-	
-	public Proveedor(String identificador, String tipoDocumento, String nombre, String telefono,
-			String correo, String direccion) {
+	public Proveedor(String identificador, com.krakedev.inventarios.entidades.tipoDocumento tipoDocumento,
+			String nombre, String telefono, String correo, String direccion) {
 		super();
 		this.identificador = identificador;
 		this.tipoDocumento = tipoDocumento;
@@ -23,17 +22,16 @@ public class Proveedor {
 		this.direccion = direccion;
 	}
 
-
 	public String getIdentificador() {
 		return identificador;
 	}
 	public void setIdentificador(String identificador) {
 		this.identificador = identificador;
 	}
-	public String getTipoDocumento() {
+	public tipoDocumento getTipoDocumento() {
 		return tipoDocumento;
 	}
-	public void setTipoDocumento(String tipoDocumento) {
+	public void setTipoDocumento(tipoDocumento tipoDocumento) {
 		this.tipoDocumento = tipoDocumento;
 	}
 	public String getNombre() {
@@ -48,7 +46,6 @@ public class Proveedor {
 	public void setTelefono(String telefono) {
 		this.telefono = telefono;
 	}
-	
 	public String getCorreo() {
 		return correo;
 	}
@@ -62,12 +59,10 @@ public class Proveedor {
 		this.direccion = direccion;
 	}
 
-
 	@Override
 	public String toString() {
 		return "Proveedor [identificador=" + identificador + ", tipoDocumento=" + tipoDocumento + ", nombre=" + nombre
-				+ ", telefono=" + telefono + ", correo=" + correo + ", direccion=" + direccion
-				+ "]";
+				+ ", telefono=" + telefono + ", correo=" + correo + ", direccion=" + direccion + "]";
 	}
 	
 	

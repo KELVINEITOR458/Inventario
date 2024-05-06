@@ -164,7 +164,7 @@ values('1778961236', 'C', 'Snacks.SA', '0984187545', 'snacksSA@gmail.com', 'Cara
 select * from proveedores;
 
 create table cabecera_pedido(
-	numero int not null,
+	numero serial not null,
 	proveedor varchar not null,
 	fecha TIMESTAMP not null,
 	estado varchar not null,
@@ -174,10 +174,10 @@ create table cabecera_pedido(
 	constraint cabecera_estado_fk foreign key(estado)
 	references estados_pedido(codigo)
 );
-insert into cabecera_pedido(numero, proveedor, fecha, estado)
-values(1, '124589632145', '30/11/2023', 'R');
-insert into cabecera_pedido(numero, proveedor, fecha, estado)
-values(2, '124589632145', '30/11/2023', 'R');
+insert into cabecera_pedido(proveedor, fecha, estado)
+values('124589632145', '30/11/2023', 'R');
+insert into cabecera_pedido(proveedor, fecha, estado)
+values('124589632145', '30/11/2023', 'R');
 select * from cabecera_pedido;
 
 create table cabecera_ventas(
@@ -213,7 +213,7 @@ values(1, 4, 1, 0.36, 0.36, 0.4);
 select * from detalle_ventas;
 
 create table detalle_pedido(
-	codigo int not null,
+	codigo serial not null,
 	cabecera_pedido int not null,
 	producto int not null,
 	cantidad int not null,
@@ -225,11 +225,11 @@ create table detalle_pedido(
 	constraint detalle_producto_fk foreign key(producto)
 	references productos(codigo_prod)
 );
-insert into detalle_pedido(codigo, cabecera_pedido, producto, cantidad, subtotal, cantidad_recibida)
-values(1,1,4,100,37.39,100);
-insert into detalle_pedido(codigo, cabecera_pedido, producto, cantidad, subtotal, cantidad_recibida)
-values(2,1,4,50,11.8,50);
-insert into detalle_pedido(codigo, cabecera_pedido, producto, cantidad, subtotal, cantidad_recibida)
-values(3,2,1,10,3.73,10);
+insert into detalle_pedido( cabecera_pedido, producto, cantidad, subtotal, cantidad_recibida)
+values(1,4,100,37.39,100);
+insert into detalle_pedido(cabecera_pedido, producto, cantidad, subtotal, cantidad_recibida)
+values(1,4,50,11.8,50);
+insert into detalle_pedido(cabecera_pedido, producto, cantidad, subtotal, cantidad_recibida)
+values(2,1,10,3.73,10);
 select * from detalle_pedido;
 

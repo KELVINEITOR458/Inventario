@@ -67,4 +67,43 @@ public class PedidosBDD {
 			throw new KrakeDevException("Error al crear pedido. Detalle: " + e.getMessage());
 		}
 	}
+	
+	public void recibir(Pedido pedido) throws KrakeDevException{
+		Connection con = null;
+		PreparedStatement ps = null;
+		PreparedStatement psDet = null;
+
+		
+		try {
+			con = ConexionBDD.obtenerConexion();
+			ps = con.prepareStatement("update cabecera_pedido set estado='R' where numero = ? " );
+			ps.setInt(1, pedido.getCodigo());
+		
+			ps.executeUpdate();
+			
+			ArrayList<DetallePedido> detallesPedido = pedido.getDetalles();
+			DetallePedido det;
+			for(int i=0; i<detallesPedido.size(); i++) {
+				det = detallesPedido.get(i);
+				psDet=con.prepareStatement("update detalle_pedido set cantidad_recibida = ?, subtotal = ? "
+						+ "where codigo = ?");
+				psDet.setInt(1, det.getCantidadRecibida());
+				BigDecimal pv = det.getProducto().getPrecioVenta();
+				BigDecimal cantidad = new BigDecimal(det.getCantidadRecibida());
+				BigDecimal subtotal = pv.multiply(cantidad);
+				psDet.setBigDecimal(2, subtotal);
+				psDet.setInt(3, det.getCodigo());
+				psDet.executeUpdate();
+			}
+			
+			
+			
+		} catch (KrakeDevException e) {
+			e.printStackTrace();
+			throw e;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new KrakeDevException("Error al crear pedido. Detalle: " + e.getMessage());
+		}
+	}
 }

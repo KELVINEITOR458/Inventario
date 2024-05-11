@@ -123,5 +123,105 @@ public class PedidosBDD {
 		}
 	}
 	
+	public void insertarVentas(Pedido pedido) throws KrakeDevException{
+        Connection con = null;
+        PreparedStatement ps = null;
+        PreparedStatement psDet = null;
+        PreparedStatement psCv = null;
+        ResultSet rsClave = null;
+        int codigoCabeceraVentas = 0;
+        
+        Date fechaActual = new Date();
+        Timestamp fechaHoraActual = new Timestamp(fechaActual.getTime()); 
+        
+        try {
+            con = ConexionBDD.obtenerConexion();
+            ps = con.prepareStatement("insert into cabecera_ventas(fecha, total_sin_iva, iva, total) " 
+                    + "values(?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            ps.setTimestamp(1, fechaHoraActual);
+            ps.setBigDecimal(2, BigDecimal.ZERO); 
+            ps.setBigDecimal(3, BigDecimal.ZERO); 
+            ps.setBigDecimal(4, BigDecimal.ZERO); 
+        
+            ps.executeUpdate();
+            
+            rsClave = ps.getGeneratedKeys();
+            if(rsClave.next()) {
+                codigoCabeceraVentas = rsClave.getInt(1);
+            }
+            
+            ArrayList<DetallePedido> detallesPedido = pedido.getDetalles();
+            for(DetallePedido det : detallesPedido) {
+                psDet=con.prepareStatement("insert into detalle_ventas(cabecera_ventas,codigo_producto,cantidad,precio_venta,subtotal,subtotal_iva)"
+                        + "values(?,?,?,?,?,?)");
+                psDet.setInt(1, codigoCabeceraVentas);
+                psDet.setInt(2, det.getProducto().getCodigo());
+                psDet.setInt(3, det.getCantidadSolicitada());
+                psDet.setBigDecimal(4, det.getProducto().getPrecioVenta());
+                BigDecimal pv = det.getProducto().getPrecioVenta();
+                BigDecimal cantidad = new BigDecimal(det.getCantidadRecibida());
+                BigDecimal subtotal = pv.multiply(cantidad);
+                double subtotalIvaDouble;
+                BigDecimal subtotalIva;
+                psDet.setBigDecimal(5, subtotal);
+                if(det.getProducto().isTieneIVA()) {
+                    double subtotalDouble = subtotal.doubleValue();
+                    double ivaDet = subtotalDouble * 0.12; 
+                    subtotalIvaDouble = subtotalDouble + ivaDet;
+                    subtotalIva = BigDecimal.valueOf(subtotalIvaDouble);
+                } else {
+                    subtotalIva = subtotal;
+                }
+                psDet.setBigDecimal(6, subtotalIva);
+                psDet.executeUpdate();
+            }
+            
+            BigDecimal totalSinIva = BigDecimal.ZERO;
+            BigDecimal iva = BigDecimal.ZERO;
+            BigDecimal total = BigDecimal.ZERO;
+
+            for (DetallePedido detalle : detallesPedido) {
+                BigDecimal precioVenta = detalle.getProducto().getPrecioVenta();
+                BigDecimal cantidad = new BigDecimal(detalle.getCantidadRecibida());
+                BigDecimal subtotal = precioVenta.multiply(cantidad);
+
+                totalSinIva = totalSinIva.add(subtotal);
+
+                if (detalle.getProducto().isTieneIVA()) {
+                    double ivaDet = subtotal.doubleValue() * 0.12;
+                    iva = iva.add(BigDecimal.valueOf(ivaDet));
+                }
+            }
+
+            total = totalSinIva.add(iva);
+
+            psCv = con.prepareStatement("update cabecera_ventas set total_sin_iva = ?, iva = ?, total = ? where codigo = ?");
+            psCv.setBigDecimal(1, totalSinIva);
+            psCv.setBigDecimal(2, iva);
+            psCv.setBigDecimal(3, total);
+            psCv.setInt(4, codigoCabeceraVentas);
+            psCv.executeUpdate();
+            
+            for(DetallePedido det : detallesPedido) {
+                psCv = con.prepareStatement("insert into historial_stock(fecha, referencia, producto, cantidad)"
+                        + "values(?,?,?,?)");
+                psCv.setTimestamp(1, fechaHoraActual);
+                psCv.setString(2, "VENTA " + pedido.getCodigo()); 
+                psCv.setInt(3, det.getProducto().getCodigo());
+                psCv.setInt(4, -det.getCantidadRecibida()); 
+                psCv.executeUpdate();
+            }
+
+            System.out.println("Se crea historial");
+
+        } catch (KrakeDevException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new KrakeDevException("Error al crear pedido. Detalle: " + e.getMessage());
+        } 
+    }
+	
 
 }

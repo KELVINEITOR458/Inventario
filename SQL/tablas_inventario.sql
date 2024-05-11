@@ -181,7 +181,7 @@ values('124589632145', '30/11/2023', 'R');
 select * from cabecera_pedido;
 
 create table cabecera_ventas(
-	codigo int not null,
+	codigo serial not null,
 	fecha TIMESTAMP NOT NULL,
 	total_sin_IVA money not null,
 	IVA money not null,

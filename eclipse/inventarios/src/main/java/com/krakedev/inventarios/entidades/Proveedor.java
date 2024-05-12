@@ -11,6 +11,13 @@ public class Proveedor {
 		
 	}
 	
+	
+	public Proveedor(String identificador) {
+		super();
+		this.identificador = identificador;
+	}
+
+
 	public Proveedor(String identificador, com.krakedev.inventarios.entidades.tipoDocumento tipoDocumento,
 			String nombre, String telefono, String correo, String direccion) {
 		super();

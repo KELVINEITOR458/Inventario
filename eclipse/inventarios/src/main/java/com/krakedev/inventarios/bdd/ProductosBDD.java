@@ -15,7 +15,7 @@ import com.krakedev.inventarios.excepciones.KrakeDevException;
 import com.krakedev.inventarios.utils.ConexionBDD;
 
 public class ProductosBDD {
-	public ArrayList<Producto> buscar(String subcadena) throws KrakeDevException{
+	public ArrayList<Producto> buscar(int codigo) throws KrakeDevException{
 		ArrayList<Producto> productos = new ArrayList<Producto>();
 		Connection con = null;
 		PreparedStatement ps = null;
@@ -32,8 +32,8 @@ public class ProductosBDD {
 					+ "from productos pro, unidades_medida udm, categorias cat "
 					+ "where pro.udm = udm.codigo_udm "
 					+ "and pro.categoria = cat.codigo_cat "
-					+ "and upper(pro.nombre) like ?");
-			ps.setString(1, "%"+subcadena.toUpperCase()+"%");
+					+ "and codigo_prod = ?");
+			ps.setInt(1, codigo);
 			rs = ps.executeQuery();
 			
 			while(rs.next()) {
@@ -105,4 +105,30 @@ public class ProductosBDD {
 		}
 		
 	}
+	
+	public void actualizarProducto(Producto producto) throws KrakeDevException{
+		Connection con = null;
+		PreparedStatement ps = null;
+		try {
+			con = ConexionBDD.obtenerConexion();
+			ps = con.prepareStatement("update productos set nombre=?, udm=?, precio_venta=?, tiene_iva=?, coste=?, categoria=?, stock=? "
+					+ "where codigo_prod = " + producto.getCodigo());
+			ps.setString(1, producto.getNombre());
+			ps.setString(2, producto.getUnidadMedida().getNombre());
+			ps.setBigDecimal(3, producto.getPrecioVenta());
+			ps.setBoolean(4, producto.isTieneIVA());
+			ps.setBigDecimal(5, producto.getCoste());
+			ps.setInt(6, producto.getCategoria().getCodigo());
+			ps.setInt(7, producto.getStock());
+			ps.executeUpdate();
+		} catch (KrakeDevException e) {
+			e.printStackTrace();
+			throw e;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new KrakeDevException("Error al actualizar producto. Detalle: " + e.getMessage());
+		}
+	}
+	
+	
 }

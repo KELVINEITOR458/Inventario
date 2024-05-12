@@ -11,7 +11,10 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import com.krakedev.inventarios.entidades.DetallePedido;
+import com.krakedev.inventarios.entidades.EstadoPedido;
 import com.krakedev.inventarios.entidades.Pedido;
+import com.krakedev.inventarios.entidades.Proveedor;
+import com.krakedev.inventarios.entidades.tipoDocumento;
 import com.krakedev.inventarios.excepciones.KrakeDevException;
 import com.krakedev.inventarios.utils.ConexionBDD;
 
@@ -222,6 +225,51 @@ public class PedidosBDD {
             throw new KrakeDevException("Error al crear pedido. Detalle: " + e.getMessage());
         } 
     }
+	
+	public ArrayList<Pedido> buscar(String subcadena) throws KrakeDevException {
+		ArrayList<Pedido> pedidos = new ArrayList<Pedido>();
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Proveedor proveedor = null;
+		Pedido pedido = null;
+		try {
+			con = ConexionBDD.obtenerConexion();
+			ps = con.prepareStatement("select * from "
+					+ "cabecera_pedido cp, proveedores pro, tipo_documento tp "
+					+ "where pro.identificador = '"
+					+ subcadena + "' "
+					+ "and cp.proveedor = pro.identificador");
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				int numero = rs.getInt("numero");
+				String identificador = rs.getString("proveedor");
+				String codigoTipoDocumento = rs.getString("tipo_documento");
+				String nombre = rs.getString("nombre");
+				String telefono = rs.getString("telefono");
+				String correo = rs.getString("correo");
+				String direccion = rs.getString("direccion");
+				String descripcion = rs.getString("descripcion");
+				tipoDocumento td = new tipoDocumento(codigoTipoDocumento, descripcion);
+				proveedor = new Proveedor(identificador, td, nombre, telefono, correo, direccion);
+				Timestamp fecha = rs.getTimestamp("fecha");
+				String codigoEstado = rs.getString("estado");
+				EstadoPedido estadopedido = new EstadoPedido(codigoEstado);
+				pedido = new Pedido(numero, proveedor, fecha, estadopedido);
+				pedidos.add(pedido);
+				
+			}
+		} catch (KrakeDevException e) {
+			e.printStackTrace();
+			throw e;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new KrakeDevException("Error al consultar. Detalle: " + e.getMessage());
+		}
+
+		return pedidos;
+	}
 	
 
 }
